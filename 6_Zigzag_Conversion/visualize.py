@@ -1,5 +1,5 @@
 """
-Визуализация зигзаг-преобразования с полной сеткой.
+Визуализация зигзаг-преобразования с полной сеткой и переменными.
 Управление: Enter — шаг, q — выход.
 """
 
@@ -15,7 +15,7 @@ RESET = '\033[0m'
 
 
 def visualize(s, numRows):
-    """Пошаговая визуализация зигзага с сеткой."""
+    """Пошаговая визуализация зигзага с сеткой и переменными."""
     
     if numRows == 1 or numRows >= len(s):
         print(f"  {YELLOW}Особый случай — строка не меняется{RESET}")
@@ -27,15 +27,12 @@ def visualize(s, numRows):
     row, col = 0, 0
     step = 1
     
-    # Заполняем сетку
     for ch in s:
         grid[row][col] = ch
-        
         if row == 0:
             step = 1
         elif row == numRows - 1:
             step = -1
-        
         row += step
         col += 1
     
@@ -47,70 +44,97 @@ def visualize(s, numRows):
         if key.lower() == 'q':
             sys.exit(0)
     
-    def draw_grid(current_col=-2):
-        """
-        Рисует сетку.
-        current_col == -1  → все зелёные (финал)
-        current_col == -2  → все пустые (начало)
-        current_col >= 0   → до current_col зелёные, текущий жёлтый
-        """
+    def draw_grid(current_col, max_col):
+        """Рисует сетку до колонки max_col включительно."""
         for r in range(numRows):
-            print(f"  ", end="")
-            for c in range(len(s)):
-                ch = grid[r][c]
-                if ch is None:
-                    print(" ", end=" ")
-                elif current_col == -1:
-                    print(f"{GREEN}{ch}{RESET}", end=" ")
+            print(f"     ", end="")
+            for c in range(max_col + 1):
+                val = grid[r][c]
+                if val is None:
+                    print(" · ", end="")
                 elif c == current_col:
-                    print(f"{YELLOW}{ch}{RESET}", end=" ")
-                elif c < current_col:
-                    print(f"{GREEN}{ch}{RESET}", end=" ")
+                    print(f"{YELLOW}[{val}]{RESET}", end="")
                 else:
-                    print(" ", end=" ")
-            print()
+                    print(f" {GREEN}{val}{RESET} ", end="")
+            # Накопленная строка
+            line = ''.join(grid[r][c] for c in range(max_col + 1) if grid[r][c] is not None)
+            print(f"  →  {GREEN}{line!r}{RESET}")
+    
+    rows = [''] * numRows
+    cur_row = 0
+    cur_step = 1
     
     clear()
-    print(f"{CYAN}{'='*55}{RESET}")
+    print(f"{CYAN}{'='*60}{RESET}")
     print(f"{BOLD}Zigzag: {s!r}, строк = {numRows}{RESET}")
-    print(f"{CYAN}{'='*55}{RESET}\n")
-    print(f"  Пустая сетка ({numRows} строк × {len(s)} столбцов):")
-    print()
-    draw_grid(current_col=-2)  # все пустые
+    print(f"{CYAN}{'='*60}{RESET}\n")
+    print(f"  Начальное состояние:")
+    print(f"    rows = {['']*numRows}")
+    print(f"    row  = {cur_row}")
+    print(f"    step = {cur_step} ({'▼ вниз' if cur_step == 1 else '▲ вверх'})")
     print()
     wait()
     
-    # Проходим по шагам
     for step_num, ch in enumerate(s):
         clear()
-        print(f"{CYAN}{'='*55}{RESET}")
+        print(f"{CYAN}{'='*60}{RESET}")
         print(f"{BOLD}Шаг {step_num + 1}/{len(s)}: символ {YELLOW}{ch!r}{RESET}")
-        print(f"{CYAN}{'='*55}{RESET}\n")
-        print(f"  Сетка:")
+        print(f"{CYAN}{'='*60}{RESET}\n")
+        
+        print(f"  {BOLD}Сетка:{RESET}")
         print()
-        draw_grid(current_col=step_num)
+        draw_grid(step_num, step_num)
+        print()
+        
+        # Переменные ДО
+        print(f"  {BOLD}Переменные ДО:{RESET}")
+        print(f"    row  = {cur_row}")
+        print(f"    step = {cur_step} ({'▼ вниз' if cur_step == 1 else '▲ вверх'})")
+        print(f"    rows = {rows}")
+        print()
+        
+        # Действие
+        rows[cur_row] += ch
+        print(f"  {BOLD}Действие:{RESET}")
+        print(f"    {YELLOW}{ch!r}{RESET} → rows[{cur_row}]")
+        print(f"    rows[{cur_row}] = {rows[cur_row]!r}")
+        print()
+        
+        # Меняем направление
+        if cur_row == 0:
+            cur_step = 1
+            print(f"    row == 0 (верх) → step = {GREEN}1 (▼ вниз){RESET}")
+        elif cur_row == numRows - 1:
+            cur_step = -1
+            print(f"    row == {numRows - 1} (низ) → step = {RED}-1 (▲ вверх){RESET}")
+        else:
+            print(f"    row == {cur_row} (середина) → step не меняется")
+        
+        cur_row += cur_step
+        print(f"    row = {cur_row - cur_step} + ({cur_step}) = {GREEN}{cur_row}{RESET}")
+        print()
+        
+        # Переменные ПОСЛЕ
+        print(f"  {BOLD}Переменные ПОСЛЕ:{RESET}")
+        print(f"    row  = {cur_row}")
+        print(f"    step = {cur_step} ({'▼ вниз' if cur_step == 1 else '▲ вверх'})")
+        print(f"    rows = {rows}")
         print()
         wait()
     
-    # Финал: полная сетка + результат
+    # Финал — полная сетка
     clear()
-    print(f"{CYAN}{'='*55}{RESET}")
+    result = ''.join(rows)
+    print(f"{CYAN}{'='*60}{RESET}")
     print(f"{BOLD}Финальная сетка:{RESET}")
-    print(f"{CYAN}{'='*55}{RESET}\n")
-    draw_grid(current_col=-1)  # все зелёные
+    print(f"{CYAN}{'='*60}{RESET}\n")
+    draw_grid(-1, len(s) - 1)
     print()
-    
-    # Собираем результат построчно
-    result_parts = []
     print(f"  {BOLD}Читаем построчно:{RESET}")
     for r in range(numRows):
-        line = ''.join(ch for ch in grid[r] if ch is not None)
-        result_parts.append(line)
-        print(f"    Строка {r}: {GREEN}{line!r}{RESET}")
-    
-    result = ''.join(result_parts)
+        print(f"    Строка {r}: {GREEN}{rows[r]!r}{RESET}")
     print(f"\n  {BOLD}Результат:{RESET} {GREEN}{result!r}{RESET}")
-    print(f"{GREEN}{'='*55}{RESET}\n")
+    print(f"{GREEN}{'='*60}{RESET}\n")
 
 
 if __name__ == "__main__":
