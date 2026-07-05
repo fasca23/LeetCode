@@ -1,4 +1,3 @@
-
 ---
 id: remove-duplicates-from-sorted-list
 title: 83. Удаление дубликатов из отсортированного списка
