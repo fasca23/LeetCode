@@ -1,0 +1,1 @@
+pngquant --quality=50-70 --ext .png --force images/*.png
