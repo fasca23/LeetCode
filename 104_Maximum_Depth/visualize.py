@@ -77,69 +77,121 @@ def visualize(values):
     if root:
         draw_tree(root)
     print()
-    print(f"  {BOLD}Алгоритм:{RESET} стек хранит (узел, глубина).")
-    print(f"  pop → обновить max → push детей с глубиной +1.")
+    print(f"  {BOLD}Алгоритм:{RESET}")
+    print(f"  Стек хранит пары: (узел, глубина_этого_узла).")
+    print(f"  pop → сравниваем depth с max_depth →")
+    print(f"  → push детей с depth+1")
+    print()
+    print(f"  {BOLD}Переменные:{RESET}")
+    print(f"  max_depth — максимальная глубина (ответ)")
+    print(f"  stack    — список пар (узел, глубина)")
+    print(f"  node     — текущий узел (из pop)")
+    print(f"  depth    — глубина текущего узла")
     print()
     wait()
     
     if not root:
-        print(f"  {RED}Пустое дерево → глубина 0{RESET}\n")
+        print(f"  {RED}Пустое дерево → max_depth = 0{RESET}\n")
         return
     
+    # Начальное состояние
     stack = [(root, 1)]
+    
+    clear()
+    print(f"{CYAN}{'='*55}{RESET}")
+    print(f"{BOLD}Начальное состояние{RESET}")
+    print(f"{CYAN}{'='*55}{RESET}\n")
+    print(f"  max_depth = {RED}0{RESET}")
+    print(f"  stack     = [({root.val}, 1)]")
+    print()
+    print(f"  Кладём корень ({root.val}, 1) в стек.")
+    print(f"  Глубина корня = 1.")
+    print()
+    wait()
     
     while stack:
         step += 1
         node, depth = stack.pop()
+        old_max = max_depth
+        
+        # Проверяем: новый максимум?
+        is_new_max = depth > max_depth
+        if is_new_max:
+            max_depth = depth
         
         clear()
         print(f"{CYAN}{'='*55}{RESET}")
-        print(f"{BOLD}Шаг {step}: pop{RESET}")
+        print(f"{BOLD}Шаг {step}: pop из стека{RESET}")
         print(f"{CYAN}{'='*55}{RESET}\n")
         
+        # Дерево
         draw_tree(root, node)
         print()
         
-        print(f"  Узел: {YELLOW}{node.val}{RESET}  |  глубина: {depth}")
-        print(f"  Максимум до: {max_depth}")
+        # Таблица переменных
+        print(f"  ┌────────────┬──────────────────────┐")
+        print(f"  │ Переменная │ Значение             │")
+        print(f"  ├────────────┼──────────────────────┤")
+        print(f"  │ node       │ {YELLOW}{node.val}{RESET:<20} │")
+        print(f"  │ depth      │ {depth:<20} │")
+        print(f"  │ max_depth  │ {old_max} → {max_depth if is_new_max else old_max:<20} │")
+        if is_new_max:
+            print(f"  │            │ {GREEN}↑ новый максимум!{RESET}   │")
+        print(f"  ├────────────┼──────────────────────┤")
         
-        if depth > max_depth:
-            max_depth = depth
-            print(f"  {GREEN}Новый максимум: {max_depth}{RESET}")
+        # Стек
+        if stack:
+            print(f"  │ stack      │ ({stack[-1][0].val}, {stack[-1][1]}) ← верх   │")
+            for n, d in reversed(stack[1:]):
+                print(f"  │            │ ({n.val}, {d})             │")
+        else:
+            print(f"  │ stack      │ (пуст)               │")
+        print(f"  └────────────┴──────────────────────┘")
+        print()
+        
+        # Действие
+        print(f"  {BOLD}Действие:{RESET}")
+        print(f"  pop → узел {YELLOW}{node.val}{RESET}, его глубина = {depth}")
+        print(f"  Сравниваем: depth ({depth}) > max_depth ({old_max})?")
+        print(f"  → {GREEN if is_new_max else RED}{is_new_max}{RESET}")
+        if is_new_max:
+            print(f"  → max_depth = {GREEN}{depth}{RESET}")
         print()
         
         # Дети
         children = []
         if node.left:
-            children.append((node.left, "left"))
+            children.append(("left", node.left))
         if node.right:
-            children.append((node.right, "right"))
+            children.append(("right", node.right))
         
         if children:
-            print(f"  Дети:")
-            for child, side in children:
-                print(f"    push ({child.val}, {depth + 1})  ← {side}")
+            print(f"  {BOLD}Добавляем детей:{RESET}")
+            for side, child in children:
+                print(f"  push ({child.val}, depth+1) = ({child.val}, {depth + 1})  ← {side}")
                 stack.append((child, depth + 1))
         else:
-            print(f"  {GREEN}Лист!{RESET} Детей нет, глубина = {depth}")
-        
-        # Стек
-        if stack:
-            print(f"\n  Стек ({len(stack)} шт.):")
-            for n, d in reversed(stack):
-                marker = " ← верх" if (n, d) == stack[-1] else ""
-                print(f"    ({n.val}, {d}){marker}")
-        else:
-            print(f"\n  Стек: пуст")
+            print(f"  {GREEN}Лист!{RESET} Детей нет → ничего не добавляем")
+            print(f"  Глубина этого листа = {depth}")
         
         print()
         wait()
     
+    # Финал
     clear()
     print(f"{GREEN}{'='*55}{RESET}")
-    print(f"{BOLD}Результат: глубина = {max_depth}{RESET}")
+    print(f"{BOLD}Результат{RESET}")
     print(f"{GREEN}{'='*55}{RESET}\n")
     draw_tree(root)
+    print()
+    print(f"  ┌────────────┬──────────────────────┐")
+    print(f"  │ Переменная │ Значение             │")
+    print(f"  ├────────────┼──────────────────────┤")
+    print(f"  │ stack      │ (пуст)               │")
+    print(f"  │ max_depth  │ {GREEN}{max_depth}{RESET:<20} │")
+    print(f"  └────────────┴──────────────────────┘")
+    print()
+    print(f"  {BOLD}Максимальная глубина: {GREEN}{max_depth}{RESET}")
     print()
 
 
