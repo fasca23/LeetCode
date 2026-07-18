@@ -1,5 +1,5 @@
 """
-Визуализация построения строки треугольника Паскаля.
+Визуализация построения строки треугольника Паскаля — пирамида чисел.
 Управление: Enter — шаг, q — выход.
 """
 
@@ -15,9 +15,9 @@ RESET = '\033[0m'
 
 
 def visualize(rowIndex):
-    """Пошаговая визуализация построения строки."""
+    """Пошаговая визуализация — пирамида Паскаля."""
     
-    row = [1]
+    triangle = []
     step = 0
     
     def clear():
@@ -28,97 +28,108 @@ def visualize(rowIndex):
         if key.lower() == 'q':
             sys.exit(0)
     
-    def draw_row(row, highlight=None, highlight2=None):
-        """Рисует строку с подсветкой элементов."""
-        print(f"  [", end="")
-        for k, val in enumerate(row):
-            if k > 0:
-                print(", ", end="")
-            if k == highlight:
-                print(f"{YELLOW}{val}{RESET}", end="")
-            elif k == highlight2:
-                print(f"{CYAN}{val}{RESET}", end="")
-            else:
-                print(f"{val}", end="")
-        print(f"]")
+    def draw_pyramid(highlight_row=-1, highlight_j=None, highlight_j2=None):
+        """Рисует пирамиду с правильным выравниванием."""
+        if not triangle:
+            return
+        
+        max_row = triangle[-1]
+        max_row_len = len(max_row)
+        # Ширина одной ячейки: 3 символа на число + 1 пробел справа
+        cell_w = 4
+        max_width = max_row_len * cell_w
+        
+        for i, row in enumerate(triangle):
+            # Центрируем ряд: отступ = (max_width - ширина_ряда) / 2
+            row_width = len(row) * cell_w
+            padding = (max_width - row_width) // 2
+            
+            row_str = ""
+            for k, val in enumerate(row):
+                if k > 0:
+                    row_str += " " * (cell_w - 3)  # отступ между ячейками
+                
+                if i == highlight_row and k == highlight_j:
+                    row_str += f"{YELLOW}{val:^3}{RESET}"
+                elif i == highlight_row and k == highlight_j2:
+                    row_str += f"{CYAN}{val:^3}{RESET}"
+                elif i == highlight_row:
+                    row_str += f"{val:^3}"
+                else:
+                    row_str += f"{val:^3}"
+            
+            print(f"  {' ' * padding}{row_str}")
     
     clear()
     print(f"{CYAN}{'='*55}{RESET}")
-    print(f"{BOLD}Pascal's Triangle II: rowIndex = {rowIndex}{RESET}")
+    print(f"{BOLD}Треугольник Паскаля: rowIndex = {rowIndex}{RESET}")
     print(f"{CYAN}{'='*55}{RESET}\n")
-    print(f"  Треугольник Паскаля (первые ряды):")
-    print(f"    0: [1]")
-    print(f"    1: [1, 1]")
-    print(f"    2: [1, 2, 1]")
-    print(f"    3: [1, 3, 3, 1]")
-    print(f"    4: [1, 4, 6, 4, 1]")
-    print()
-    print(f"  {BOLD}Алгоритм:{RESET}")
-    print(f"  Начинаем с [1]. Для каждого нового ряда:")
-    print(f"  1. Добавляем 1 в конец")
-    print(f"  2. Обновляем середину справа налево:")
-    print(f"     row[j] = row[j] + row[j-1]")
-    print()
-    print(f"  {YELLOW}жёлтый{RESET} — текущий j")
-    print(f"  {CYAN}голубой{RESET} — row[j-1] (верхний левый)")
+    print(f"  Каждое число = сумма двух верхних.")
+    print(f"  {YELLOW}жёлтый{RESET} — новое значение")
+    print(f"  {CYAN}голубой{RESET} — верхние (которые складываем)")
     print()
     wait()
     
     # Ряд 0
+    triangle.append([1])
     step += 1
+    
     clear()
     print(f"{CYAN}{'='*55}{RESET}")
     print(f"{BOLD}Шаг {step}: ряд 0{RESET}")
     print(f"{CYAN}{'='*55}{RESET}\n")
-    print(f"  Начальный ряд:")
-    draw_row(row)
+    draw_pyramid()
     print()
-    print(f"  row = [1]")
+    print(f"  Ряд 0 всегда [1] — вершина треугольника.")
     print()
     wait()
     
     if rowIndex == 0:
-        print(f"  {GREEN}Готово: {row}{RESET}\n")
+        print(f"  {GREEN}Готово!{RESET}\n")
         return
     
+    row = [1]
+    
     for i in range(1, rowIndex + 1):
-        step += 1
-        old_row = row[:]
-        
-        # Добавляем 1 в конец
+        # Добавляем правую 1
         row.append(1)
+        triangle.append(row[:])
         
+        step += 1
         clear()
         print(f"{CYAN}{'='*55}{RESET}")
-        print(f"{BOLD}Шаг {step}: ряд {i} — добавляем правую 1{RESET}")
+        print(f"{BOLD}Шаг {step}: ряд {i} — края{RESET}")
         print(f"{CYAN}{'='*55}{RESET}\n")
-        print(f"  Предыдущий ряд: {old_row}")
-        print(f"  Добавляем 1 в конец:")
-        draw_row(row, len(row) - 1)
+        
+        draw_pyramid(i, 0, len(row) - 1)
         print()
-        print(f"  row.append(1) → {row}")
+        print(f"  Края всегда 1:")
+        print(f"    левый  = {YELLOW}row[0] = 1{RESET}")
+        print(f"    правый = {YELLOW}row[{len(row)-1}] = 1{RESET}")
+        print(f"  Ряд {i}: {row}")
         print()
         wait()
         
-        # Обновляем середину справа налево
+        # Заполняем середину справа налево
         for j in range(i - 1, 0, -1):
             step += 1
             old_val = row[j]
             left_val = row[j - 1]
             new_val = old_val + left_val
             row[j] = new_val
+            triangle[i] = row[:]
             
             clear()
             print(f"{CYAN}{'='*55}{RESET}")
-            print(f"{BOLD}Шаг {step}: ряд {i} — обновляем j={j}{RESET}")
+            print(f"{BOLD}Шаг {step}: ряд {i} — j={j}{RESET}")
             print(f"{CYAN}{'='*55}{RESET}\n")
             
-            draw_row(row, j, j - 1)
+            draw_pyramid(i, j, j - 1)
             print()
-            print(f"  j = {j}")
+            
             print(f"  row[{j}] = row[{j}] + row[{j-1}]")
-            print(f"  {old_val} + {left_val} = {YELLOW}{new_val}{RESET}")
-            print(f"  row = {row}")
+            print(f"  {CYAN}{old_val}{RESET} + {CYAN}{left_val}{RESET} = {YELLOW}{new_val}{RESET}")
+            print(f"  Ряд {i}: {row}")
             print()
             wait()
     
@@ -127,8 +138,9 @@ def visualize(rowIndex):
     print(f"{GREEN}{'='*55}{RESET}")
     print(f"{BOLD}Готово!{RESET}")
     print(f"{GREEN}{'='*55}{RESET}\n")
-    print(f"  rowIndex = {rowIndex}")
-    print(f"  Результат: {GREEN}{row}{RESET}")
+    draw_pyramid()
+    print()
+    print(f"  Ответ (ряд {rowIndex}): {GREEN}{row}{RESET}")
     print()
 
 
