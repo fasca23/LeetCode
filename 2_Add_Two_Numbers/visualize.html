@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сложение двух чисел - Визуализация</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .example-selector {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .example-btn {
+            padding: 12px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .example-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .example-btn .example-desc {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .visualization-area {
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .current-example {
+            text-align: center;
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .linked-list-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .linked-list-container.active {
+            background: #fff3cd;
+            border-color: #ffc107;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .linked-list-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .linked-list {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 80px;
+            gap: 5px;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        .node {
+            width: 55px;
+            height: 55px;
+            border: 3px solid #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            background: white;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .node.current {
+            background: #fff3cd;
+            border-color: #ffc107;
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(255, 193, 7, 0.6);
+            animation: pulse 1.5s infinite;
+        }
+
+        .node.result {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            animation: slideIn 0.5s;
+        }
+
+        .node.highlight {
+            background: #d4edda;
+            border-color: #28a745;
+            animation: highlightNode 1s;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 1.5em;
+            animation: bounce 0.8s infinite;
+        }
+
+        .arrow {
+            margin: 0 15px;
+            font-size: 28px;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .null-node {
+            width: 55px;
+            height: 55px;
+            border: 3px dashed #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            animation: fadeIn 0.5s;
+        }
+
+        .info-panel h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .step-details {
+            text-align: center;
+            font-size: 1.2em;
+            line-height: 1.8;
+        }
+
+        .step-details .operation {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .carry-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            border-radius: 20px;
+            margin: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: white;
+            min-width: 120px;
+        }
+
+        .btn-start { background: #28a745; }
+        .btn-start:hover:not(:disabled) { background: #218838; transform: translateY(-2px); }
+
+        .btn-next { background: #007bff; }
+        .btn-next:hover:not(:disabled) { background: #0056b3; transform: translateY(-2px); }
+
+        .btn-auto { background: #ffc107; color: #333; }
+        .btn-auto:hover:not(:disabled) { background: #e0a800; transform: translateY(-2px); }
+
+        .btn-reset { background: #dc3545; }
+        .btn-reset:hover:not(:disabled) { background: #c82333; transform: translateY(-2px); }
+
+        .control-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.2); }
+            50% { transform: scale(1.3); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: scale(0); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes highlightNode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); background: #28a745; color: white; }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .node { width: 40px; height: 40px; font-size: 1em; }
+            .arrow { margin: 0 8px; font-size: 20px; }
+            .example-btn { min-width: 120px; font-size: 12px; }
+            .header h1 { font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Сложение двух чисел</h1>
+            <p>Задача LeetCode: Add Two Numbers</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Цифры хранятся от младшей к старшей: 342 → [2, 4, 3]
+            </p>
+        </div>
+
+        <div class="example-selector">
+            <button class="example-btn active" onclick="selectExample(0)">
+                <div>Пример 1</div>
+                <div class="example-desc">342 + 465 = 807</div>
+            </button>
+            <button class="example-btn" onclick="selectExample(1)">
+                <div>Пример 2</div>
+                <div class="example-desc">999 + 1 = 1000</div>
+            </button>
+            <button class="example-btn" onclick="selectExample(2)">
+                <div>Пример 3</div>
+                <div class="example-desc">555 + 555 = 1110</div>
+            </button>
+            <button class="example-btn" onclick="selectExample(3)">
+                <div>Пример 4</div>
+                <div class="example-desc">Разная длина</div>
+            </button>
+        </div>
+
+        <div class="visualization-area">
+            <div class="current-example" id="example-title"></div>
+
+            <div class="linked-list-container" id="l1-container">
+                <div class="linked-list-title">
+                    <span>🔢 Первое число (L1):</span>
+                    <span id="l1-value" style="color: #667eea;"></span>
+                </div>
+                <div class="linked-list" id="l1"></div>
+            </div>
+
+            <div class="linked-list-container" id="l2-container">
+                <div class="linked-list-title">
+                    <span>🔢 Второе число (L2):</span>
+                    <span id="l2-value" style="color: #667eea;"></span>
+                </div>
+                <div class="linked-list" id="l2"></div>
+            </div>
+
+            <div class="linked-list-container" id="result-container">
+                <div class="linked-list-title">
+                    <span>✅ Результат:</span>
+                    <span id="result-value" style="color: #17a2b8;"></span>
+                </div>
+                <div class="linked-list" id="result"></div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <h3>📝 Пошаговое объяснение</h3>
+                <div class="step-details" id="step-details">
+                    Выберите пример и нажмите "Старт"
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn btn-start" id="btn-start" onclick="startVisualization()">
+                ▶️ Старт
+            </button>
+            <button class="control-btn btn-next" id="btn-next" onclick="nextStep()" disabled>
+                ⏭️ Следующий шаг
+            </button>
+            <button class="control-btn btn-auto" id="btn-auto" onclick="toggleAutoPlay()">
+                🔄 Автовоспроизведение
+            </button>
+            <button class="control-btn btn-reset" id="btn-reset" onclick="resetVisualization()">
+                🔄 Сброс
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Примеры для визуализации
+        const examples = [
+            {
+                l1: [2, 4, 3],
+                l2: [5, 6, 4],
+                title: "Пример 1: 342 + 465 = 807",
+                description: "Классический пример без сложных переносов"
+            },
+            {
+                l1: [9, 9, 9],
+                l2: [1],
+                title: "Пример 2: 999 + 1 = 1000",
+                description: "Перенос через все разряды"
+            },
+            {
+                l1: [5, 5, 5],
+                l2: [5, 5, 5],
+                title: "Пример 3: 555 + 555 = 1110",
+                description: "Постоянный перенос в каждом разряде"
+            },
+            {
+                l1: [1, 0, 0, 1],
+                l2: [9, 9],
+                title: "Пример 4: 1001 + 99 = 1100",
+                description: "Списки разной длины"
+            }
+        ];
+
+        let currentExample = 0;
+        let p1 = 0, p2 = 0;
+        let carry = 0;
+        let result = [];
+        let isRunning = false;
+        let autoPlayInterval = null;
+        let stepNumber = 0;
+
+        function selectExample(index) {
+            currentExample = index;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.example-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            
+            resetVisualization();
+        }
+
+        function resetVisualization() {
+            p1 = 0;
+            p2 = 0;
+            carry = 0;
+            result = [];
+            isRunning = false;
+            stepNumber = 0;
+            
+            document.getElementById('btn-next').disabled = true;
+            document.getElementById('btn-start').disabled = false;
+            
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                document.getElementById('btn-auto').textContent = '🔄 Автовоспроизведение';
+            }
+            
+            renderAll();
+            updateInfo("Нажмите 'Старт' для начала визуализации");
+        }
+
+        function startVisualization() {
+            resetVisualization();
+            isRunning = true;
+            document.getElementById('btn-next').disabled = false;
+            document.getElementById('btn-start').disabled = true;
+            
+            const example = examples[currentExample];
+            updateInfo(`Начинаем сложение: ${example.description}`);
+            renderAll();
+        }
+
+        function nextStep() {
+            if (!isRunning) return;
+            
+            const example = examples[currentExample];
+            const l1 = example.l1;
+            const l2 = example.l2;
+            
+            if (p1 >= l1.length && p2 >= l2.length && carry === 0) {
+                // Завершение
+                const finalResult = result.join(' → ');
+                updateInfo(`
+                    <strong>✅ Готово!</strong><br>
+                    Результат: ${finalResult}<br>
+                    Число: ${parseInt(result.slice().reverse().join(''))}
+                `);
+                isRunning = false;
+                document.getElementById('btn-next').disabled = true;
+                document.getElementById('btn-start').disabled = false;
+                
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                    document.getElementById('btn-auto').textContent = '🔄 Автовоспроизведение';
+                }
+                return;
+            }
+            
+            stepNumber++;
+            
+            // Получаем текущие значения
+            const v1 = p1 < l1.length ? l1[p1] : 0;
+            const v2 = p2 < l2.length ? l2[p2] : 0;
+            const total = v1 + v2 + carry;
+            const digit = total % 10;
+            const newCarry = Math.floor(total / 10);
+            
+            // Обновляем информацию
+            updateInfo(`
+                <strong>Шаг ${stepNumber}:</strong><br>
+                <div class="operation">
+                    ${v1} + ${v2} + ${carry} (перенос) = ${total}
+                </div>
+                Записываем: <strong>${digit}</strong><br>
+                Новый перенос: <strong>${newCarry}</strong>
+            `);
+            
+            // Добавляем результат
+            result.push(digit);
+            carry = newCarry;
+            p1++;
+            p2++;
+            
+            renderAll();
+        }
+
+        function toggleAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                document.getElementById('btn-auto').textContent = '🔄 Автовоспроизведение';
+            } else {
+                document.getElementById('btn-auto').textContent = '⏸️ Пауза';
+                autoPlayInterval = setInterval(() => {
+                    if (!isRunning || (p1 >= examples[currentExample].l1.length && 
+                                       p2 >= examples[currentExample].l2.length && 
+                                       carry === 0)) {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = null;
+                        document.getElementById('btn-auto').textContent = '🔄 Автовоспроизведение';
+                        return;
+                    }
+                    nextStep();
+                }, 2000);
+            }
+        }
+
+        function renderLinkedList(containerId, nodes, pointer, isResult = false) {
+            const container = document.getElementById(containerId);
+            const example = examples[currentExample];
+            
+            if (nodes.length === 0) {
+                container.innerHTML = '<span style="color:#999;">[пусто]</span>';
+                return;
+            }
+            
+            container.innerHTML = nodes.map((node, i) => {
+                const nodeClass = isResult ? 'node result' : (i === pointer ? 'node current' : 'node');
+                const pointerHtml = i === pointer && !isResult ? '<div class="pointer">▼</div>' : '';
+                const arrowHtml = i < nodes.length - 1 ? '<div class="arrow">→</div>' : '';
+                
+                return `
+                    <div class="node-wrapper">
+                        ${pointerHtml}
+                        <div class="${nodeClass}">${node}</div>
+                        ${arrowHtml}
+                    </div>
+                `;
+            }).join('');
+            
+            // Добавляем null в конце, если это исходные списки и указатель вышел за пределы
+            if (!isResult && pointer >= nodes.length) {
+                const nullHtml = '<div class="null-node">NULL</div>';
+                container.innerHTML += nullHtml;
+            }
+            
+            // Обновляем числовое значение
+            const valueElement = document.getElementById(containerId + '-value');
+            if (valueElement && !isResult) {
+                const num = parseInt(nodes.join('')) || 0;
+                valueElement.textContent = `(${num})`;
+            } else if (valueElement && isResult && nodes.length > 0) {
+                const num = parseInt(nodes.slice().reverse().join('')) || 0;
+                valueElement.textContent = `(${num})`;
+            }
+        }
+
+        function renderAll() {
+            const example = examples[currentExample];
+            document.getElementById('example-title').textContent = example.title;
+            
+            renderLinkedList('l1', example.l1, p1);
+            renderLinkedList('l2', example.l2, p2);
+            renderLinkedList('result', result, -1, true);
+            
+            // Подсвечиваем активные контейнеры
+            document.getElementById('l1-container').classList.toggle('active', p1 < example.l1.length && isRunning);
+            document.getElementById('l2-container').classList.toggle('active', p2 < example.l2.length && isRunning);
+            document.getElementById('result-container').classList.toggle('active', result.length > 0);
+        }
+
+        function updateInfo(html) {
+            document.getElementById('step-details').innerHTML = html;
+            document.getElementById('info-panel').style.animation = 'none';
+            setTimeout(() => {
+                document.getElementById('info-panel').style.animation = 'fadeIn 0.5s';
+            }, 10);
+        }
+
+        // Инициализация
+        renderAll();
+    </script>
+</body>
+</html>

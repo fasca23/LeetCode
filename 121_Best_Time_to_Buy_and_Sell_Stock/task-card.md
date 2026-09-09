@@ -1,4 +1,3 @@
-
 ---
 id: best-time-to-buy-and-sell-stock
 title: 121. Лучшее время для покупки и продажи
@@ -17,3 +16,23 @@ screenshots: 0
 4. **Память:** O(1) — две переменные.
 
 **Ключевой момент:** Нельзя продать раньше чем купить. Поэтому минимум обновляем до расчёта прибыли.
+
+```python
+class Solution:
+    def maxProfit(self, prices: list[int]) -> int:
+        min_price = float('inf')
+        max_profit = 0
+        
+        for price in prices:
+            # Обновляем минимальную цену
+            if price < min_price:
+                min_price = price
+            
+            # Считаем потенциальную прибыль
+            profit = price - min_price
+            
+            # Обновляем максимальную прибыль
+            if profit > max_profit:
+                max_profit = profit
+        
+        return max_profit
